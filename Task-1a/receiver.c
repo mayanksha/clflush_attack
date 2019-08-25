@@ -29,20 +29,20 @@ int main(int argc, char **argv) {
 
     map = (char *) map_file("/tmp/test.txt", &handle);
     if(map==NULL){
+        perror("File not found");
         return -1;
     }
 
     CYCLES a,b;
     int characters = 0;
-    while(1) {
-        printf("f\n");
-        volatile char y = *(map + 512);
-        clflush((map + 512));
-        a = rdtscp();
 
+    while(characters<2) {
+
+        clflush((map));
         do_something();
+        a = rdtscp();
         /* usleep (2); */
-        y = *((map + 512));
+        volatile char y = *((map));
         b = rdtscp();
         /* printf("%d\n",b-a); */
         if((b-a) < 50) {
@@ -52,18 +52,18 @@ int main(int argc, char **argv) {
         }
 
 
-        // clflush(map+512);
+        clflush(map+512);
+        do_something();
+        a = rdtscp();	
+        volatile char x = *(map+512);
+        b = rdtscp();
+        //printf("%d \n",b-a);
+        if((b-a) < 50 ){
+        	printf("B\n");
+        	characters++;
 
-        // a = rdtscp();	
-        // x = *(map+512);
-        // b = rdtscp();
-        // //printf("%d \n",b-a);
-        // if((b-a) < 50 ){
-        // 	printf("B");
-        // 	characters++;
-        // }
 
-
+         }
     }
     // while(1){
     //   char x = *(map);
@@ -93,3 +93,6 @@ int main(int argc, char **argv) {
     return 0;
 
 }
+
+//taskset 0x4 PID
+//taskset -cp PID

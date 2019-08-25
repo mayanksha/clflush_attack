@@ -36,16 +36,18 @@ int main(int argc, char **argv) {
 
 	for(int i=0;i<msg_len;i++){
 		if(msg[i]=='A'){
-			char x = *(map);
+			volatile char x = *(map);
 			for(int i=0;i<50000;i++){
-				char j = *(map);
+				//char j = *(map);
+				int j = 2*i;
 				j++;
 			}
 		}
 		else{
-			char x = *(map+64);
+			volatile char x = *(map+512);
 			for(int i=0;i<50000;i++){
-				char j = *(map+64);
+				//char j = *(map+512);
+				int j = 2*i;
 				j++;
 			}
 		}
