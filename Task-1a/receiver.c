@@ -1,70 +1,70 @@
 #include "../lib/util.h"
+#include <unistd.h>
 
-void do_something(){
-	for(int i=0;i<50000;i++){
-		int j = i*2;
-		j++;
-	}
-	return;
+void do_something() {
+    for(int i=0;i<10;i++) {
+        int j = i*2;
+        j++;
+    }
+    return;
 }
 
 int main(int argc, char **argv) {
 
-	char msg[51]; //buffer to receive data
-	unsigned int msg_len = 0;
-	clock_t t_recv;
-	double recv_time;
-	double recv_rate;
-	msg[0] = '\0';
-	
-	// TODO: Establish your cache covert channel
+    char msg[51]; //buffer to receive data
+    unsigned int msg_len = 0;
+    clock_t t_recv;
+    double recv_time;
+    double recv_rate;
+    msg[0] = '\0';
 
-	t_recv = clock();
+    // TODO: Establish your cache covert channel
 
-	// TODO: synchronize with sender and receive data in msg buffer.
+    t_recv = clock();
 
-	map_handle_t *handle;     // declaring a handle for file mapping
-  	char *map;
+    // TODO: synchronize with sender and receive data in msg buffer.
 
-  	map = (char *) map_file("/home/vinayakt/test.txt", &handle);
-  	if(map==NULL){
-  		return -1;
-  	}
+    map_handle_t *handle;     // declaring a handle for file mapping
+    char *map;
 
-  	CYCLES a,b;
-  	int characters = 0;
-    clflush(map);
-    clflush(map+512);
-  	while(1){
-      char y = *map;
-  		clflush(map);
-  		//do_something();
-  		a = rdtscp();	
-  		char x = *(map);
-  		b = rdtscp();
-  		//printf("%d a\n",b-a);
-  		if((b-a) < 50 ){
-  			printf("A");
-        //break;
-  			characters++;
-  		}
+    map = (char *) map_file("/tmp/test.txt", &handle);
+    if(map==NULL){
+        return -1;
+    }
 
-      
-  		
-  		// clflush(map+512);
-  		// //do_something();
+    CYCLES a,b;
+    int characters = 0;
+    while(1) {
+        printf("f\n");
+        volatile char y = *(map + 512);
+        clflush((map + 512));
+        a = rdtscp();
 
-  		// a = rdtscp();	
-  		// x = *(map+512);
-  		// b = rdtscp();
-  		// //printf("%d \n",b-a);
-  		// if((b-a) < 50 ){
-  		// 	printf("B");
-  		// 	characters++;
-  		// }
-  		
+        do_something();
+        /* usleep (2); */
+        y = *((map + 512));
+        b = rdtscp();
+        /* printf("%d\n",b-a); */
+        if((b-a) < 50) {
+            printf("A\n");
+            //break;
+            characters++;
+        }
 
-  	}
+
+        // clflush(map+512);
+
+        // a = rdtscp();	
+        // x = *(map+512);
+        // b = rdtscp();
+        // //printf("%d \n",b-a);
+        // if((b-a) < 50 ){
+        // 	printf("B");
+        // 	characters++;
+        // }
+
+
+    }
     // while(1){
     //   char x = *(map);
     // clflush(map);
@@ -73,23 +73,23 @@ int main(int argc, char **argv) {
     // b = rdtscp();
     // printf("time is %d\n",b-a);  
     // }
-    
-  	
-  	//printf("2nd %x\n",measure_one_block_access_time(map));
+
+
+    //printf("2nd %x\n",measure_one_block_access_time(map));
 
 
 
 
-	t_recv = clock() - t_recv;
-	msg_len = strlen(msg);
-	recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
-	recv_rate = (double) (msg_len * 8) / recv_time;
+    t_recv = clock() - t_recv;
+    msg_len = strlen(msg);
+    recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
+    recv_rate = (double) (msg_len * 8) / recv_time;
 
-	printf("[Receiver] Received data : %s\n", msg);
-	printf("[Receiver] Total data received : %u bytes\n", msg_len);
-	printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
-	printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
+    printf("[Receiver] Received data : %s\n", msg);
+    printf("[Receiver] Total data received : %u bytes\n", msg_len);
+    printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
+    printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
 
-	return 0;
+    return 0;
 
 }
