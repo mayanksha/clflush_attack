@@ -1,8 +1,9 @@
 #include "../lib/util.h"
 #include <unistd.h>
+#include <time.h>
 
 void do_something() {
-    for(int i=0;i<400;i++) {
+    for(int i=0;i<10000;i++) {
         int j = i*2;
         j++;
     }
@@ -35,18 +36,21 @@ int main(int argc, char **argv) {
 
     CYCLES a,b;
     int characters = 0;
+    struct timespec tstart = {0,0};
+    struct timespec tend = {0,0};
 
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
     while(1) {
         /* printf("Foo\n"); */
         clflush((map));
         do_something();
         a = rdtscp();
         /* usleep (2); */
-        volatile char y = *((map));
+        volatile char y = *(map);
         b = rdtscp();
         /* printf("%d\n",b-a); */
         if((b-a) < 50) {
-            printf("A\n");
+            printf("A");
             //break;
             characters++;
         }
@@ -59,10 +63,15 @@ int main(int argc, char **argv) {
         b = rdtscp();
         //printf("%d \n",b-a);
         if((b-a) < 50 ){
-            printf("B\n");
+            printf("B");
             characters++;
         }
+
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        if (tend.tv_sec - tstart.tv_sec > 2)
+            break;
     }
+    printf ("\n");
     // while(1){
     //   char x = *(map);
     // clflush(map);
@@ -74,9 +83,6 @@ int main(int argc, char **argv) {
 
 
     //printf("2nd %x\n",measure_one_block_access_time(map));
-
-
-
 
     t_recv = clock() - t_recv;
     msg_len = strlen(msg);

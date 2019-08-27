@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
     /* fgets (msg, 50, stdin); */
     for (int i = 0; i < (int) sizeof (msg); i++)
     {
+        /* msg[i] = 'A'; */
         if (i % 2)
             msg[i] = 'A';
         else
@@ -44,7 +45,7 @@ int main(int argc, char **argv) {
     for(int i=0;i < msg_len;i++){
         if(msg[i]=='A'){
             volatile char x = *(map);
-            for(int i=0;i<50000;i++){
+            for(int i=0;i<20000;i++){
                 //char j = *(map);
                 int j = 2*i;
                 j++;
@@ -52,7 +53,7 @@ int main(int argc, char **argv) {
         }
         else{
             volatile char x = *(map+512);
-            for(int i=0;i<50000;i++){
+            for(int i=0;i<20000;i++){
                 //char j = *(map+512);
                 int j = 2*i;
                 j++;
