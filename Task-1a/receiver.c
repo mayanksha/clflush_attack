@@ -1,9 +1,9 @@
 #include "../lib/util.h"
 #include <unistd.h>
 #include <time.h>
-
+#define SIZE 10000
 void do_something() {
-    for(int i=0;i<10000;i++) {
+    for(int i=0;i<1000;i++) {
         int j = i*2;
         j++;
     }
@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    char arr[SIZE];
     CYCLES a,b;
     int characters = 0;
     struct timespec tstart = {0,0};
@@ -50,8 +51,9 @@ int main(int argc, char **argv) {
         b = rdtscp();
         /* printf("%d\n",b-a); */
         if((b-a) < 50) {
-            printf("A");
+            //arr[characters] = 'A';
             //break;
+            printf("A");
             characters++;
         }
 
@@ -63,6 +65,7 @@ int main(int argc, char **argv) {
         b = rdtscp();
         //printf("%d \n",b-a);
         if((b-a) < 50 ){
+            //arr[characters] = 'B';
             printf("B");
             characters++;
         }
@@ -71,7 +74,8 @@ int main(int argc, char **argv) {
         if (tend.tv_sec - tstart.tv_sec > 2)
             break;
     }
-    printf ("\n");
+    //printf ("%s\n",arr);
+    printf("\n");
     // while(1){
     //   char x = *(map);
     // clflush(map);
@@ -89,10 +93,10 @@ int main(int argc, char **argv) {
     recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
     recv_rate = (double) (msg_len * 8) / recv_time;
 
-    printf("[Receiver] Received data : %s\n", msg);
-    printf("[Receiver] Total data received : %u bytes\n", msg_len);
-    printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
-    printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
+    dprintf(STDERR_FILENO,"[Receiver] Received data : %s\n", msg);
+    dprintf(STDERR_FILENO,"[Receiver] Total data received : %u bytes\n", msg_len);
+    dprintf(STDERR_FILENO,"[Receiver] Time taken to receive data : %lf second\n", recv_time);
+    dprintf(STDERR_FILENO,"[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
 
     return 0;
 

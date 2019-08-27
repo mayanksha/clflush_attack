@@ -1,5 +1,4 @@
 #include "util.h"
-
 /*
  * Loads from virtual address addr and measure the access time
  */
