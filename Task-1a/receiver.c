@@ -2,8 +2,8 @@
 #include <unistd.h>
 #include <time.h>
 #define SIZE 10000
-void do_something() {
-    for(int i=0;i<1000;i++) {
+void do_something(int loop_param) {
+    for(int i=0;i<loop_param;i++) {
         int j = i*2;
         j++;
     }
@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    int loop_param = atoi(argv[1]);
     char arr[SIZE];
     CYCLES a,b;
     int characters = 0;
@@ -44,7 +45,7 @@ int main(int argc, char **argv) {
     while(1) {
         /* printf("Foo\n"); */
         clflush((map));
-        do_something();
+        do_something(loop_param);
         a = rdtscp();
         /* usleep (2); */
         volatile char y = *(map);
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
 
 
         clflush(map+512);
-        do_something();
+        do_something(loop_param);
         a = rdtscp();
         volatile char x = *(map+512);
         b = rdtscp();
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
         }
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        if (tend.tv_sec - tstart.tv_sec > 2)
+        if (tend.tv_sec - tstart.tv_sec > 3)
             break;
     }
     //printf ("%s\n",arr);
