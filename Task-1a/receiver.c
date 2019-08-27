@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 void do_something() {
-    for(int i=0;i<10;i++) {
+    for(int i=0;i<400;i++) {
         int j = i*2;
         j++;
     }
@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
     CYCLES a,b;
     int characters = 0;
 
-    while(characters<2) {
-
+    while(1) {
+        /* printf("Foo\n"); */
         clflush((map));
         do_something();
         a = rdtscp();
@@ -54,16 +54,14 @@ int main(int argc, char **argv) {
 
         clflush(map+512);
         do_something();
-        a = rdtscp();	
+        a = rdtscp();
         volatile char x = *(map+512);
         b = rdtscp();
         //printf("%d \n",b-a);
         if((b-a) < 50 ){
-        	printf("B\n");
-        	characters++;
-
-
-         }
+            printf("B\n");
+            characters++;
+        }
     }
     // while(1){
     //   char x = *(map);
