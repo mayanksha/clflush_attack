@@ -61,9 +61,9 @@ int main(int argc, char **argv) {
     trans_time = ((double) t_send) / CLOCKS_PER_SEC;
     trans_rate = (double) (msg_len * 8) / trans_time;
 
-    printf("[Sender] Total data Send : %u bytes\n", msg_len);
-    printf("[Sender] Time to send data : %lf second\n", trans_time);
-    printf("[Sender] Data transmission rate : %lu bps\n", (unsigned long) trans_rate);
+    //printf("[Sender] Total data Send : %u bytes\n", msg_len);
+    //printf("[Sender] Time to send data : %lf second\n", trans_time);
+    //printf("[Sender] Data transmission rate : %lu bps\n", (unsigned long) trans_rate);
 
     return 0;
 }

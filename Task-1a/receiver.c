@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
     }
 
     int loop_param = 500;
+    loop_param = atoi(argv[1]);
     char arr[SIZE];
     CYCLES a,b;
     struct timespec tstart = {0,0};
@@ -87,17 +88,17 @@ int main(int argc, char **argv) {
 
     //printf("2nd %x\n",measure_one_block_access_time(map));
 
-    printf ("\n");
+    printf ("%s",msg);
     t_recv = clock() - t_recv;
     msg_len = strlen(msg);
     recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
     recv_rate = (double) (msg_len * 8) / recv_time;
 
     /* printf("[Receiver] Received data : %s\n", msg); */
-    printf("[Receiver] Total data received : %u bytes\n", msg_len);
-    printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
-    printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
-    printf("[Receiver] Accuracy = %f%\n", (msg_len / (1.0 * BYTES_SENT)) * 100);
+    //printf("[Receiver] Total data received : %u bytes\n", msg_len);
+    //printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
+    //printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
+    //printf("[Receiver] Accuracy = %f%\n", (msg_len / (1.0 * BYTES_SENT)) * 100);
 
     return 0;
 
