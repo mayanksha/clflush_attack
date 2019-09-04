@@ -36,8 +36,10 @@ int main(int argc, char **argv) {
     }
 
     int loop_param = 500;
+    loop_param = atoi(argv[1]);
     char arr[SIZE];
     CYCLES a,b;
+
     struct timespec tstart = {0,0};
     struct timespec tend = {0,0};
 
@@ -58,14 +60,25 @@ int main(int argc, char **argv) {
         }
 
 
-        clflush(map+512);
+        clflush(map+64);
         do_something(loop_param);
         a = rdtscp();
-        volatile char x = *(map+512);
+        volatile char x = *(map+64);
         b = rdtscp();
         //printf("%d \n",b-a);
         if((b-a) < 60 ){
             msg[msg_len++] = 'B';
+            /* printf ("%c", msg[msg_len-1]); */
+        }
+
+        clflush(map+128);
+        do_something(loop_param);
+        a = rdtscp();
+        volatile char z = *(map+128);
+        b = rdtscp();
+        //printf("%d \n",b-a);
+        if((b-a) < 60 ){
+            msg[msg_len++] = 'C';
             /* printf ("%c", msg[msg_len-1]); */
         }
 
@@ -87,7 +100,7 @@ int main(int argc, char **argv) {
 
     //printf("2nd %x\n",measure_one_block_access_time(map));
 
-    printf ("\n");
+    //printf ("%s",msg);
     t_recv = clock() - t_recv;
     msg_len = strlen(msg);
     recv_time = ((double) t_recv) / CLOCKS_PER_SEC;

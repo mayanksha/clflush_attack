@@ -30,10 +30,12 @@ int main(int argc, char **argv) {
     for (int i = 0; i < (int) sizeof (msg); i++)
     {
         /* msg[i] = 'A'; */
-        if (i % 2)
+        if (i % 3 == 0)
             msg[i] = 'A';
-        else
+        else if(i %3 == 1)
             msg[i] = 'B';
+        else if(i%3 == 2)
+        	msg[i] = 'C';
     }
 
     msg_len = strlen(msg);
@@ -46,11 +48,13 @@ int main(int argc, char **argv) {
         if(msg[i]=='A'){
             volatile char x = *(map);
         }
-        else{
-            volatile char x = *(map+512);
+        else if(msg[i]=='B'){
+            volatile char x = *(map+64);
+        } else if(msg[i] == 'C'){
+        	volatile char x = *(map+128);
         }
 
-        for(int i=0;i<30000;i++){
+        for(int i=0;i<40000;i++){
             //char j = *(map);
             int j = 2*i;
             j++;
@@ -61,9 +65,9 @@ int main(int argc, char **argv) {
     trans_time = ((double) t_send) / CLOCKS_PER_SEC;
     trans_rate = (double) (msg_len * 8) / trans_time;
 
-    printf("[Sender] Total data Send : %u bytes\n", msg_len);
-    printf("[Sender] Time to send data : %lf second\n", trans_time);
-    printf("[Sender] Data transmission rate : %lu bps\n", (unsigned long) trans_rate);
+    //printf("[Sender] Total data Send : %u bytes\n", msg_len);
+    //printf("[Sender] Time to send data : %lf second\n", trans_time);
+    //printf("[Sender] Data transmission rate : %lu bps\n", (unsigned long) trans_rate);
 
     return 0;
 }
