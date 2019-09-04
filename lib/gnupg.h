@@ -7,7 +7,7 @@
 
 #define square_add 0x0000c58c4		//mpih-mul.c:270 (First cache line in mpih_sqr_n())
 
-#define remainder_add 0x0000c4dee	//mpih-div.c:329 (Loop in default case in mpihelp_divrem())
+#define remainder_add 0x0000c5122	//mpih-div.c:329 (Loop in default case in mpihelp_divrem())
 
 #define multiply_add 0x0000c5245	//mpih-mul.c:121 (First cache line of mul_n())
 

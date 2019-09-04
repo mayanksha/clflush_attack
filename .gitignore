@@ -4,3 +4,4 @@
 *.o
 tags
 *gnupg.h
+lib/gnupg.h
