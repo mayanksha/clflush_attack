@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
     loop_param = atoi(argv[1]);
     char arr[SIZE];
     CYCLES a,b;
+
     struct timespec tstart = {0,0};
     struct timespec tend = {0,0};
 
@@ -59,14 +60,25 @@ int main(int argc, char **argv) {
         }
 
 
-        clflush(map+512);
+        clflush(map+64);
         do_something(loop_param);
         a = rdtscp();
-        volatile char x = *(map+512);
+        volatile char x = *(map+64);
         b = rdtscp();
         //printf("%d \n",b-a);
         if((b-a) < 60 ){
             msg[msg_len++] = 'B';
+            /* printf ("%c", msg[msg_len-1]); */
+        }
+
+        clflush(map+128);
+        do_something(loop_param);
+        a = rdtscp();
+        volatile char z = *(map+128);
+        b = rdtscp();
+        //printf("%d \n",b-a);
+        if((b-a) < 60 ){
+            msg[msg_len++] = 'C';
             /* printf ("%c", msg[msg_len-1]); */
         }
 
@@ -88,17 +100,17 @@ int main(int argc, char **argv) {
 
     //printf("2nd %x\n",measure_one_block_access_time(map));
 
-    printf ("%s",msg);
+    //printf ("%s",msg);
     t_recv = clock() - t_recv;
     msg_len = strlen(msg);
     recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
     recv_rate = (double) (msg_len * 8) / recv_time;
 
     /* printf("[Receiver] Received data : %s\n", msg); */
-    //printf("[Receiver] Total data received : %u bytes\n", msg_len);
-    //printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
-    //printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
-    //printf("[Receiver] Accuracy = %f%\n", (msg_len / (1.0 * BYTES_SENT)) * 100);
+    printf("[Receiver] Total data received : %u bytes\n", msg_len);
+    printf("[Receiver] Time taken to receive data : %lf second\n", recv_time);
+    printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
+    printf("[Receiver] Accuracy = %f%\n", (msg_len / (1.0 * BYTES_SENT)) * 100);
 
     return 0;
 

@@ -1,6 +1,6 @@
 // #include <time.h>
 #include "../lib/util.h"
-
+#include "../lib/gnupg.h"
 
 int main(int argc, char **argv) {
 
