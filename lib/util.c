@@ -18,7 +18,7 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr) {
     " rdtsc            \n\t"
     " sub %%rdi, %%rax \n\t"
     : "=a"(cycles) /*output*/
-    : "r"(addr)
+    : "c"(addr)
     : "r8", "rdi");
 
   return cycles;

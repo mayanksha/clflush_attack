@@ -21,7 +21,7 @@
 #define CACHE_BLOCK_SIZE	64
 #define MAX_BUFFER_LEN	1024
 
-#define BYTES_SENT 40000
+#define BYTES_SENT 1000
 
 typedef struct map_handle_s {
   int fd;
