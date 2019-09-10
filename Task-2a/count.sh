@@ -10,12 +10,12 @@ then
     exit -1
 fi
 
-for i in `seq 30`
+for i in `seq 20 2 50`
 do
     times=$(( i*10 ))
     echo "Times = ${times}"
 
-    (taskset 0x4 ./spy ${times} > ./temp) & (sleep 0.1 && taskset 0x1  ${GPG_BINARY} -d ${ENCYPTED_FILE} 2>&1 > /dev/null)
+    (taskset 0x4 ./spy ${times} > ./temp) & (sleep 0.001 && taskset 0x1  ${GPG_BINARY} -d ${ENCYPTED_FILE} 2>&1 > /dev/null)
 
     for job in `jobs -p`
     do
