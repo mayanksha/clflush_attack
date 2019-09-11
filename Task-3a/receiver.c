@@ -31,6 +31,25 @@ int main(int argc, char **argv) {
 	contents[j++] = 255;
 	contents[j++] = 216;
 	contents[j++] = 255;
+	contents[j++] = 224;
+	contents[j++] = 0;
+	contents[j++] = 16;
+	contents[j++] = 74;
+	contents[j++] = 70;
+	contents[j++] = 73;
+	contents[j++] = 70;
+	contents[j++] = 0;
+	contents[j++] = 1;
+	contents[j++] = 1;
+	contents[j++] = 0;
+	contents[j++] = 95;
+	contents[j++] = 0;
+	contents[j++] = 0;
+	contents[j++] = 1;
+	contents[j++] = 0;
+	contents[j++] = 1;
+	contents[j++] = 0;
+	contents[j++] = 0;
 	// TODO: Create a binary file with the filename stored in received_file buffer in write mode.
 
 	t_recv = clock();
@@ -47,18 +66,20 @@ int main(int argc, char **argv) {
     struct timespec tend = {0,0};
 
     //int loop_param = 500;
-    int THRESHOLD = 60;
+    int THRESHOLD = 100;
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     //CYCLES a,b;
     while(1) {
 
     	for (int i = 0; i < 256; ++i)
     	{
-    		clflush((map+i*64));
-    		do_something(10);
-	        volatile long int time = measure_one_block_access_time(map+i*64);
-	        
-	        //printf("%d %d\n",time,i);
+    		clflush((map+i*4096));
+    	}
+    	do_something(500);
+
+    	for (int i = 0; i < 256; ++i)
+    	{
+	        volatile long int time = measure_one_block_access_time(map+i*4096);
 	        if(time < THRESHOLD) {
 	        	printf("%d ",i );
 	            contents[j++] = i;
@@ -66,7 +87,7 @@ int main(int argc, char **argv) {
     	}
 
     	clock_gettime(CLOCK_MONOTONIC, &tend);
-        if (tend.tv_sec - tstart.tv_sec > 45)
+        if (tend.tv_sec - tstart.tv_sec > 5)
             break;
         
 
@@ -75,7 +96,7 @@ int main(int argc, char **argv) {
      contents[j++] = 255;
      contents[j++] = 217;
      printf("\n%ld",j);
-     FILE *file = fopen("red_heart_rec.jpg", "wb");
+     FILE *file = fopen("red_heart_rec", "wb");
      if(file==NULL){
      	perror("File error");
      }

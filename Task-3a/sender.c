@@ -41,11 +41,11 @@ int main(int argc, char **argv) {
      fclose(file);
 
 
-	for(int i=0;i < sz;i++){
-        volatile char x = *(map+64*contents[i]);
+	for(int i=22;i < sz;i++){
+        volatile char x = *(map+4096*contents[i]);
         x++;
 
-        for(int i=0;i<500000;i++){
+        for(int i=0;i<50000;i++){
             //char j = *(map);
             int j = 2*i;
             j++;
