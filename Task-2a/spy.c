@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     times = atoi (argv[1]);
     addr = map_file (gnupg_path, &file_map);
     THRESHOLD = get_clflush_threshold ((void *)addr);
-    printf ("THRESHOLD = %d\n", THRESHOLD);
+    //printf ("THRESHOLD = %d\n", THRESHOLD);
 
     if (addr == (void *) -1)
         return 4;

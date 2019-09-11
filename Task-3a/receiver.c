@@ -1,5 +1,13 @@
 #include "../lib/util.h"
-
+#include <unistd.h>
+#include <time.h>
+void do_something(int loop_param) {
+    for(int i=0;i<loop_param;i++) {
+        int j = i*2;
+        j++;
+    }
+    return;
+}
 int main(int argc, char **argv) {
 
 	char filename[51]; //buffer to receive filename
@@ -17,12 +25,63 @@ int main(int argc, char **argv) {
 	 * Receive the filename from the sender process over covert channel
 	 * Use filename buffer to store received file name
 	*/
-
+	unsigned long int j=0;
 	strcat(received_file, filename);
-
+	unsigned char contents[32300];
+	contents[j++] = 255;
+	contents[j++] = 216;
+	contents[j++] = 255;
 	// TODO: Create a binary file with the filename stored in received_file buffer in write mode.
 
 	t_recv = clock();
+	map_handle_t *handle;     // declaring a handle for file mapping
+    char *map;
+
+    map = (char *) map_file("/tmp/test.txt", &handle);
+    if(map==NULL){
+        perror("File not found");
+        return -1;
+    }
+
+    struct timespec tstart = {0,0};
+    struct timespec tend = {0,0};
+
+    //int loop_param = 500;
+    int THRESHOLD = 60;
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    //CYCLES a,b;
+    while(1) {
+
+    	for (int i = 0; i < 256; ++i)
+    	{
+    		clflush((map+i*64));
+    		do_something(10);
+	        volatile long int time = measure_one_block_access_time(map+i*64);
+	        
+	        //printf("%d %d\n",time,i);
+	        if(time < THRESHOLD) {
+	        	printf("%d ",i );
+	            contents[j++] = i;
+	        }	
+    	}
+
+    	clock_gettime(CLOCK_MONOTONIC, &tend);
+        if (tend.tv_sec - tstart.tv_sec > 45)
+            break;
+        
+
+     }
+
+     contents[j++] = 255;
+     contents[j++] = 217;
+     printf("\n%ld",j);
+     FILE *file = fopen("red_heart_rec.jpg", "wb");
+     if(file==NULL){
+     	perror("File error");
+     }
+     fwrite(contents,j*sizeof(unsigned char),j,file);
+     fclose(file);
+
 
 	/* TODO:
 	 * Receive image file contents from the sender process over covert channel
