@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     map_handle_t *handle;     // declaring a handle for file mapping
     char *map;
 
-    map = (char *) map_file("/tmp/test.txt", &handle);
+    map = (char *) map_file("../share_mem.txt", &handle);
     if(map == NULL){
         return -1;
     }
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     /* fgets (msg, 50, stdin); */
     for (int i = 0; i < (int) sizeof (msg); i++)
     {
-        msg[i] = 'A' + (i % NUM_CHARS);
+        msg[i] = '0' + (i % NUM_CHARS);
     }
 
     t_send = clock();
@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
     // TODO: Transmit message over the cache covert channel
 
     for(int i=0;i < BYTES_SENT;i++) {
-        volatile char x = *(map + (msg[i] - 'A')*4096);
-        do_something (20000);
+        volatile char x = *(map + (msg[i] - '0')*4096);
+        do_something (30000);
         x += 2;
         msg_len++;
     }

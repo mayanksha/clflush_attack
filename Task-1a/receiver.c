@@ -2,9 +2,15 @@
 #include <unistd.h>
 #include <time.h>
 #include <math.h>
+#include <signal.h>
 
 #define SIZE 10000
 #define NUM_ACCESSES 10000
+
+volatile sig_atomic_t stop = 0;
+static void int_handler (int signum) {
+    stop = 1;
+}
 
 static inline void do_something(int loop_param) {
     for(int i=0;i<loop_param;i++) {
@@ -14,7 +20,7 @@ static inline void do_something(int loop_param) {
     return;
 }
 
-int compare(const void * a, const void * b) {
+static inline int compare(const void * a, const void * b) {
     return ( *(int*)a - *(int*)b );
 }
 
@@ -48,39 +54,47 @@ static inline int get_clflush_threshold (void *flush_addr) {
 int main(int argc, char **argv) {
     int THRESHOLD;
     unsigned int msg_len = 0;
-    clock_t t_recv;
+    clock_t t_start = 0, t_end;
     double recv_time, recv_rate;
-    char *map, msg[BYTES_SENT];
-    int loop_param = 500;
-    char arr[SIZE];
+    char msg[BYTES_SENT];
+    void *map;
+    int loop_param = 2000;
     struct timespec tstart = {0,0}, tend = {0,0};
     map_handle_t *handle;     // declaring a handle for file mapping
 
-    /* loop_param = atoi(argv[1]); */
+    signal(SIGINT, int_handler);
+    if (argc == 2)
+        loop_param = atoi(argv[1]);
+    else if (argc > 2) {
+        printf ("1 optional argument specifying the iterations in do_something() is needed. Exiting!\n");
+        return -1;
+    }
 
     memset (msg, '\0', BYTES_SENT);
-    t_recv = clock();
 
-    map = (char *) map_file("/tmp/test.txt", &handle);
+    map = map_file("../share_mem.txt", &handle);
     if(map==NULL){
         perror("File not found");
         return -1;
     }
 
     THRESHOLD = get_clflush_threshold ((void *)map);
-    printf ("THRESHOLD = %d\n", THRESHOLD);
+    printf ("[Receiver] Threshold = %d\n", THRESHOLD);
+    printf ("[Receiver] To stop the receiver gracefully, please use Ctrl + C or signal with SIGINT\n");
+    printf ("[Receiver] Looping now...in hope for some data\n\n");
 
-    clock_gettime(CLOCK_MONOTONIC, &tstart);
-    while (1) {
+    while (!stop) {
         int atime;
 
         for (int i = 0; i < NUM_CHARS; i++) {
             void *addr_to_check = (map + i*4096);
             atime = measure_one_block_access_time ((void *) addr_to_check);
             if (atime < THRESHOLD) {
-                msg[msg_len++] = 'A' + i;
+                if (!t_start)
+                    t_start = clock();
+                msg[msg_len++] = '0' + i;
+                t_end = clock();
                 /* printf("%c\n", msg[i]); */
-               /* printf("%c, %d\n", 'A' + i, atime); */
             }
         }
 
@@ -88,22 +102,18 @@ int main(int argc, char **argv) {
             void *addr_to_check = (map + i*4096);
             clflush(addr_to_check);
         }
-        do_something (400);
-
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        if (tend.tv_sec - tstart.tv_sec > 1.5)
-            break;
+        do_something (loop_param);
     }
 
+    printf ("[Receiver] Data Received:\n");
     for (int i = 0; i < BYTES_SENT; i++) {
         if (msg[i] == '\0')
             break;
         printf("%c", msg[i]);
     }
     printf("\n");
-    t_recv = clock() - t_recv;
     msg_len = strlen(msg);
-    recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
+    recv_time = ((double) (t_end - t_start)) / CLOCKS_PER_SEC;
     recv_rate = (double) (msg_len * 8) / recv_time;
 
     /* printf("%d\n", msg_len); */
