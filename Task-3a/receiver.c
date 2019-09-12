@@ -1,6 +1,7 @@
 #include "../lib/util.h"
 #include <unistd.h>
 #include <time.h>
+//#include<string.h>
 void do_something(int loop_param) {
     for(int i=0;i<loop_param;i++) {
         int j = i*2;
@@ -48,6 +49,10 @@ int main(int argc, char **argv) {
 	contents[j++] = 1;
 	contents[j++] = 0;
 	contents[j++] = 0;
+	unsigned char arr[] = {255,225,0,2,0,0,0,255,219,0,67,0,3,2,2,3,2,2,3,3,3,3,4,3,3,4,5,8,5,5,4,4,5,10,7,7,6,8,12,10,12,12,11,10,11,11,13,14,18,16,13,14,17,14,11,11,16,22,16,17,19,20,21,21,21,12,15,23,24,22,20,24,18,20,21,20,255,219,0,67,1,3,4,4,5,4,5,9,5,5,9,20,13,11,13,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,255,194,0,17,8,2,170,4,0,3,1,17,0,2,17,1,3,17,1,255,196,0,28,0,1,0,1,5,1,1,0,0,0,0,0,0,0,0,0,0,0,3,1,2,4,7,8,6,5,255,196,0,27,1,1,0,2,3,1,1,0,0,0,0,0,0,0,0,0,0,0,2,3,1,4,5,6,7,255,218,0,12,3,1,0,2,16,3,16,0,0,1};
+	for(int k=0;k<237;k++){
+		contents[j++] = arr[k];
+	}
 	// TODO: Create a binary file with the filename stored in received_file buffer in write mode.
 
 	t_recv = clock();
@@ -60,6 +65,8 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    int counter = 0;
+
     struct timespec tstart = {0,0};
     struct timespec tend = {0,0};
 
@@ -68,6 +75,7 @@ int main(int argc, char **argv) {
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     //CYCLES a,b;
     int flag=0,prev=0;
+
     while(1) {
 
     	
@@ -83,6 +91,7 @@ int main(int argc, char **argv) {
 	        			contents[j++] = 0;
 	        		}
 	        		flag = 0;
+	        		counter++;
 	        	}
 	        	else{
 	        		prev = i;
@@ -91,11 +100,19 @@ int main(int argc, char **argv) {
 	        }	
     	}
 
+    	int temp = j;
+    	if(counter>192){
+    		for(int k=0;k<192;k++){
+    			contents[j++] = contents[temp-192+k];
+    		}
+    		counter = 0;
+    	}
+
     	for (int i = 0; i < 16; ++i)
     	{
     		clflush((map+i*4096));
     	}
-    	do_something(400);
+    	do_something(200);
 
     	clock_gettime(CLOCK_MONOTONIC, &tend);
         if (tend.tv_sec - tstart.tv_sec > 5)

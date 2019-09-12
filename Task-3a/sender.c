@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     }
 	
 
-	for(int i=0;i < file_size;i++){
+	for(int i=258;i < file_size;i++){
 		unsigned char y = filedata[i];
 		//printf("%d ",y);
         volatile char x = *(map+4096*(y%16));
