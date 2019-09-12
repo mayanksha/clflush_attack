@@ -1,0 +1,11 @@
+loop param 31100
+[Receiver] Threshold = 63
+[Receiver] To stop the receiver gracefully, please use Ctrl + C or signal with SIGINT
+[Receiver] Looping now...in hope for some data
+
+[Receiver] Data Received:
+
+[Receiver] Total data received : 0 bytes
+[Receiver] Time taken to receive data : 1.503232 second
+[Receiver] Data receiving rate : 0 bps
+[Receiver] Accuracy = 0.000000

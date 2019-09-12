@@ -6,6 +6,8 @@
 
 #define SIZE 10000
 #define NUM_ACCESSES 10000
+#define BYTES_SENT 5000
+#define NUM_CHARS 60
 
 volatile sig_atomic_t stop = 0;
 static void int_handler (int signum) {
@@ -13,9 +15,11 @@ static void int_handler (int signum) {
 }
 
 static inline void do_something(int loop_param) {
-    for(int i=0;i<loop_param;i++) {
+    volatile long long k = 0;
+    for(volatile int i=0; i<loop_param ;i++) {
         volatile int j = i*2;
         j++;
+        k += j;
     }
     return;
 }
@@ -58,8 +62,7 @@ int main(int argc, char **argv) {
     double recv_time, recv_rate;
     char msg[BYTES_SENT];
     void *map;
-    int loop_param = 2000;
-    struct timespec tstart = {0,0}, tend = {0,0};
+    int loop_param = 0;
     map_handle_t *handle;     // declaring a handle for file mapping
 
     signal(SIGINT, int_handler);
@@ -70,6 +73,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    printf ("loop param %d\n", loop_param);
     memset (msg, '\0', BYTES_SENT);
 
     map = map_file("../share_mem.txt", &handle);
@@ -88,21 +92,21 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < NUM_CHARS; i++) {
             void *addr_to_check = (map + i*4096);
+            clflush(addr_to_check);
+        }
+        do_something (loop_param);
+        for (int i = 0; i < NUM_CHARS; i++) {
+            void *addr_to_check = (map + i*4096);
             atime = measure_one_block_access_time ((void *) addr_to_check);
             if (atime < THRESHOLD) {
                 if (!t_start)
                     t_start = clock();
-                msg[msg_len++] = '0' + i;
+                msg[msg_len++] = 'A' + i;
                 t_end = clock();
                 /* printf("%c\n", msg[i]); */
             }
         }
 
-        for (int i = 0; i < NUM_CHARS; i++) {
-            void *addr_to_check = (map + i*4096);
-            clflush(addr_to_check);
-        }
-        do_something (loop_param);
     }
 
     printf ("[Receiver] Data Received:\n");
@@ -114,7 +118,7 @@ int main(int argc, char **argv) {
     printf("\n");
     msg_len = strlen(msg);
     recv_time = ((double) (t_end - t_start)) / CLOCKS_PER_SEC;
-    recv_rate = (double) (msg_len * 8) / recv_time;
+    recv_rate = (t_start) ? (double) (msg_len * 8) / recv_time: 0;
 
     /* printf("%d\n", msg_len); */
     printf("[Receiver] Total data received : %u bytes\n", msg_len);
