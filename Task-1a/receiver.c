@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     while (!stop) {
         int atime;
 
-        for (int i = 0; i < NUM_CHARS; i++) {
+        for (int i = NUM_CHARS - 1; i >= 0; i--) {
             void *addr_to_check = (map + i*4096);
             clflush(addr_to_check);
         }

@@ -20,10 +20,8 @@ int main(int argc, char **argv) {
     double trans_time;
     double trans_rate;
 
-    // TODO: Establish your cache covert channel
     map_handle_t *handle;     // declaring a handle for file mapping
     char *map;
-
     map = (char *) map_file("../share_mem.txt", &handle);
     if(map == NULL){
         perror ("Error while trying to use the sharedfile ../share_mem.txt\n");
@@ -39,8 +37,6 @@ int main(int argc, char **argv) {
     msg[BYTES_SENT - 1] = '\0';
 
     t_send = clock();
-
-    // TODO: Transmit message over the cache covert channel
 
     for(uint32_t i=0; i < strlen(msg) - 1; i++) {
         volatile char x = *(map + (msg[i] - 'A')*4096);
