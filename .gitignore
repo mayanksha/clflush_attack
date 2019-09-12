@@ -5,3 +5,6 @@
 tags
 *gnupg.h
 lib/gnupg.h
+*/receiver
+*/sender
+*/spy
