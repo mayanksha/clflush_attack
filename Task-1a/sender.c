@@ -1,7 +1,7 @@
 // #include <time.h>
 #include "../lib/util.h"
 
-#define BYTES_SENT 5000
+#define BYTES_SENT 50
 #define NUM_CHARS 60
 
 static inline void do_something(int loop_param) {

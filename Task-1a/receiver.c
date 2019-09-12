@@ -6,7 +6,7 @@
 
 #define SIZE 10000
 #define NUM_ACCESSES 10000
-#define BYTES_SENT 5000
+#define BYTES_SENT 50
 #define NUM_CHARS 60
 
 volatile sig_atomic_t stop = 0;
