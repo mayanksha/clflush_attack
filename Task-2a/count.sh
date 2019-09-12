@@ -10,9 +10,10 @@ then
     exit -1
 fi
 
-for i in `seq 20 2 50`
+for i in `seq 1 5 80`
 do
-    times=$(( i*10 ))
+    # times=$(( i*10 ))
+    times=$(( 350 ))
     echo "Times = ${times}"
 
     (taskset 0x4 ./spy ${times} > ./temp) & (sleep 0.001 && taskset 0x1  ${GPG_BINARY} -d ${ENCYPTED_FILE} 2>&1 > /dev/null)
@@ -21,9 +22,9 @@ do
     do
         wait $job
     done
-    S=$(cat './temp' | grep -o 'S' | wc -l)
-    M=$(cat './temp' | grep -o 'M' | wc -l)
-    r=$(cat './temp' | grep -o 'r' | wc -l)
+    S=$(cat './temp' | head -2 | grep -o 'S' | wc -l)
+    M=$(cat './temp' | head -2 | grep -o 'M' | wc -l)
+    r=$(cat './temp' | head -2 | grep -o 'r' | wc -l)
 
     S_orig=$(cat './temp2' | grep -o 'S' | wc -l)
     M_orig=$(cat './temp2' | grep -o 'M' | wc -l)
@@ -31,6 +32,7 @@ do
     echo "S = ${S}, Orig = ${S_orig}"
     echo "M = ${M}, Orig = ${M_orig}"
     echo "r = ${r}, Orig = ${r_orig}"
-    echo `cat temp | wc -c`
+    echo `cat temp | head -n2 | wc -c`
     echo ""
+    sleep 1
 done
