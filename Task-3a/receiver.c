@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 	*/
 	unsigned long int j=0;
 	strcat(received_file, filename);
-	unsigned char contents[32300];
+	unsigned char contents[40000];
 	contents[j++] = 255;
 	contents[j++] = 216;
 	contents[j++] = 255;
@@ -41,8 +41,6 @@ int main(int argc, char **argv) {
 	contents[j++] = 0;
 	contents[j++] = 1;
 	contents[j++] = 1;
-	contents[j++] = 0;
-	contents[j++] = 95;
 	contents[j++] = 0;
 	contents[j++] = 0;
 	contents[j++] = 1;
@@ -69,22 +67,35 @@ int main(int argc, char **argv) {
     int THRESHOLD = 100;
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     //CYCLES a,b;
+    int flag=0,prev=0;
     while(1) {
 
-    	for (int i = 0; i < 256; ++i)
-    	{
-    		clflush((map+i*4096));
-    	}
-    	do_something(500);
+    	
 
-    	for (int i = 0; i < 256; ++i)
+    	for (int i = 0; i < 16; ++i)
     	{
 	        volatile long int time = measure_one_block_access_time(map+i*4096);
 	        if(time < THRESHOLD) {
-	        	printf("%d ",i );
-	            contents[j++] = i;
+	        	if(flag==1){
+	        		int temp = 16*i+prev;
+	        		contents[j++] = temp;
+	        		if (temp == 255){
+	        			contents[j++] = 0;
+	        		}
+	        		flag = 0;
+	        	}
+	        	else{
+	        		prev = i;
+	        		flag = 1;
+	        	}
 	        }	
     	}
+
+    	for (int i = 0; i < 16; ++i)
+    	{
+    		clflush((map+i*4096));
+    	}
+    	do_something(400);
 
     	clock_gettime(CLOCK_MONOTONIC, &tend);
         if (tend.tv_sec - tstart.tv_sec > 5)
@@ -95,12 +106,16 @@ int main(int argc, char **argv) {
 
      contents[j++] = 255;
      contents[j++] = 217;
+     for (int i = 0; i < j; ++i)
+     {
+     	printf("%d ", contents[i]);
+     }
      printf("\n%ld",j);
      FILE *file = fopen("red_heart_rec", "wb");
      if(file==NULL){
      	perror("File error");
      }
-     fwrite(contents,j*sizeof(unsigned char),j,file);
+     fwrite(contents,sizeof(unsigned char),j,file);
      fclose(file);
 
 

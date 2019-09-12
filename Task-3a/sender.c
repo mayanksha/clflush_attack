@@ -1,6 +1,15 @@
 // #include <time.h>
 #include "../lib/util.h"
 
+void do_something(int param){
+	for(int i=0;i<param;i++){
+            //char j = *(map);
+            int j = 2*i;
+            j++;
+        }
+    return;
+}
+
 
 int main(int argc, char **argv) {
 
@@ -18,6 +27,7 @@ int main(int argc, char **argv) {
     if(map == NULL){
         return -1;
     }
+    char* filedata;
 
 	printf("Image File to be send: ");
 	//fgets (filename, 50, stdin);
@@ -27,31 +37,56 @@ int main(int argc, char **argv) {
 	 * Open image file (binary file) in read mode.
 	 * Store the size of file in file_size variable.
 	*/
+	int fd, bytes_read;
 
-	
-	FILE *file = fopen("red_heart.jpg", "rb");
-     if(file==NULL){
-     	perror("File error");
-     	return -1;
-     }
-     fseek(file, 0L, SEEK_END);
-	 long int sz = ftell(file);
-	 unsigned char contents[sz+1];
-     fread(contents,sz*sizeof(unsigned char),sz,file);
-     fclose(file);
-
-
-	for(int i=22;i < sz;i++){
-        volatile char x = *(map+4096*contents[i]);
-        x++;
-
-        for(int i=0;i<50000;i++){
-            //char j = *(map);
-            int j = 2*i;
-            j++;
-        }
+	if ((fd = open ("red_heart.jpg", O_RDONLY)) < 0) {
+        perror ("Error opening file: ");
+        if (handle != NULL)
+            free (handle);
+        return -1;
     }
-    printf("%ld\n",sz );
+    struct stat st_file;
+    if (fstat (fd, &st_file) < 0) {
+        perror ("Error getting file metadata (using fstat): ");
+        if (handle != NULL)
+            free (handle);
+        close (fd);
+        return -1;
+    }
+
+
+    /* Allocate the memory for file contents */
+    file_size = st_file.st_size;
+	//unsigned int file_size = 0;
+    if ((filedata = malloc (sizeof(char) * file_size + 1)) == NULL) {
+        perror ("Error while malloc: ");
+        if (handle != NULL)
+            free (handle);
+        close (fd);
+        return -1;
+    }
+
+    if ((bytes_read = read (fd, filedata, file_size)) < 0) {
+        perror ("Error while reading: ");
+        free (filedata);
+        if (handle != NULL)
+            free (handle);
+        close (fd);
+        return -1;
+    }
+	
+
+	for(int i=0;i < file_size;i++){
+		unsigned char y = filedata[i];
+		//printf("%d ",y);
+        volatile char x = *(map+4096*(y%16));
+        x++;
+        do_something(30000);
+        volatile char z = *(map+4096*(y/16));
+        z++;
+        do_something(30000);
+    }
+    //printf("%ld\n",sz );
 
 	t_send = clock();
 
