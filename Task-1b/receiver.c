@@ -14,7 +14,7 @@
 #define FILE_NAME_CHARS 26
 
 volatile sig_atomic_t stop = 0;
-static void hup_handler (int signum) {
+static void int_handler (int signum) {
     stop = 1;
 }
 
@@ -59,34 +59,33 @@ static inline int get_clflush_threshold (void *flush_addr) {
 
 int main(int argc, char **argv) {
     int THRESHOLD;
-	char filename[FILENAME_MAX_LEN];                      // buffer to receive filename
+    int fd;
+	char filename[FILENAME_MAX_LEN];                        // buffer to receive filename
 	char *filepath, *filedata;
 	char received_filename[FILENAME_MAX_LEN + 10] = "received_";
 	unsigned int content_length = 0, filename_len = 0;
-	clock_t t_recv;
-    int fd;
+	clock_t t_start = 0, t_end = 0;
 	double recv_time, recv_rate;
-    map_handle_t *handle;                   // declaring a handle for file mapping
+    map_handle_t *handle;                                    // declaring a handle for file mapping
 
     memset (filename, '\0', FILENAME_MAX_LEN);
 	// Establish your cache covert channel
     void *map = map_file("../share_mem.txt", &handle);
-    if (map == NULL){
+    if (map == NULL) {
         perror("File not found");
         return -1;
     }
 
-    signal(SIGHUP, hup_handler);
+    signal(SIGINT, int_handler);
     THRESHOLD = get_clflush_threshold ((void *)map);
+    printf ("[Receiver] Threshold = %d\n", THRESHOLD);
+    printf ("[Receiver] To stop the receiver gracefully, please press Ctrl + C or signal with SIGINT **TWICE**\n");
+    printf ("[Receiver] Looping now...in hope for some data\n");
 
     int break_now = 0;
     char special_chars[8] = {'/', ' ', '.', '_', '\n', '#', '$', '-'};
-    /* void *slash_addr = (void *) (map + ('/' - '\n')*4096);
-     * void *space_addr = (void *) (map + (' ' - '\n')*4096);
-     * void *dot_addr = (void *) (map + ('.' - '\n')*4096);
-     * void *underscore_addr = (void *) (map + ('_' - '\n')*4096); */
 
-    while (1) {
+    while (!stop) {
         int atime;
 
         if (filename_len >= FILENAME_MAX_LEN || break_now)
@@ -123,7 +122,7 @@ int main(int argc, char **argv) {
             clflush (map + (special_chars[i] - '\n') * 4096);
         }
 
-        do_something (350);
+        do_something (2000);
     }
 
 	strcat(received_filename, filename);
@@ -133,7 +132,6 @@ int main(int argc, char **argv) {
         perror ("Error while malloc: ");
         if (handle != NULL)
             free (handle);
-        close (fd);
         return -1;
     }
 
@@ -154,7 +152,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-	t_recv = clock();
+    stop = 0;
     while (!stop) {
         int atime;
         if (content_length >= MAX_FILE_SIZE) {
@@ -166,7 +164,10 @@ int main(int argc, char **argv) {
             void *addr_to_check = (map + i*4096);
             atime = measure_one_block_access_time ((void *) addr_to_check);
             if (atime < THRESHOLD) {
+                if (!t_start)
+                    t_start = clock();
                 filedata[content_length++] = '\n' + i;
+                t_end = clock();
             }
         }
 
@@ -175,6 +176,7 @@ int main(int argc, char **argv) {
             if (atime < THRESHOLD) {
                 if (!(content_length == 0 && special_chars[i] == '/')) {
                     filedata[content_length++] = special_chars[i];
+                    t_end = clock();
                 }
             }
         }
@@ -188,7 +190,7 @@ int main(int argc, char **argv) {
             clflush (map + (special_chars[i] - '\n') * 4096);
         }
 
-        do_something (350);
+        do_something (2000);
     }
 
     if (write (fd, filedata, content_length) < 0) {
@@ -204,8 +206,7 @@ int main(int argc, char **argv) {
      * Wrtie them into the file opened earlier
      * store the length of the file content in content_length variable
      */
-	t_recv = clock() - t_recv;
-	recv_time = ((double) t_recv) / CLOCKS_PER_SEC;
+	recv_time = ((double) (t_end - t_start)) / CLOCKS_PER_SEC;
 	recv_rate = (double) (content_length * 8) / recv_time;
 
 	printf("[Receiver] File (%s) received : %u bytes\n", received_filename, content_length);

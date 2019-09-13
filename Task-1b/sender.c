@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
         x += 2;
     }
 
+    do_something (100000);
 	t_send = clock();
     printf ("[Sender] Bytes read = %d\n", bytes_read);
     for(int i = 0; i < bytes_read; i++) {
