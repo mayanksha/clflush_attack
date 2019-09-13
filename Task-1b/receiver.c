@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
     int fd;
 	char filename[FILENAME_MAX_LEN];                        // buffer to receive filename
 	char *filepath, *filedata;
+    int loop_param = 2000;
 	char received_filename[FILENAME_MAX_LEN + 10] = "received_";
 	unsigned int content_length = 0, filename_len = 0;
 	clock_t t_start = 0, t_end = 0;
@@ -77,6 +78,13 @@ int main(int argc, char **argv) {
     }
 
     signal(SIGINT, int_handler);
+    if (argc == 2)
+        loop_param = atoi(argv[1]);
+    else if (argc > 2) {
+        printf ("At max, 1 optional argument specifying the iterations in do_something() is needed. Exiting!\n");
+        return -1;
+    }
+
     THRESHOLD = get_clflush_threshold ((void *)map);
     printf ("[Receiver] Threshold = %d\n", THRESHOLD);
     printf ("[Receiver] To stop the receiver gracefully, please press Ctrl + C or signal with SIGINT **TWICE**\n");
@@ -122,7 +130,7 @@ int main(int argc, char **argv) {
             clflush (map + (special_chars[i] - '\n') * 4096);
         }
 
-        do_something (2000);
+        do_something (loop_param);
     }
 
 	strcat(received_filename, filename);
@@ -135,7 +143,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    filepath = strncpy (filepath, "./", 2);
+    filepath = strncpy (filepath, "./received_files/", 19);
     strncat(filepath, received_filename, PATH_MAX);
     if ((fd = open (filepath, O_RDWR | O_CREAT, 0755)) < 0) {
         perror ("Error opening file: ");
@@ -190,7 +198,7 @@ int main(int argc, char **argv) {
             clflush (map + (special_chars[i] - '\n') * 4096);
         }
 
-        do_something (2000);
+        do_something (loop_param);
     }
 
     if (write (fd, filedata, content_length) < 0) {
@@ -207,10 +215,11 @@ int main(int argc, char **argv) {
      * store the length of the file content in content_length variable
      */
 	recv_time = ((double) (t_end - t_start)) / CLOCKS_PER_SEC;
-	recv_rate = (double) (content_length * 8) / recv_time;
+	recv_rate = t_start ? (double) (content_length * 8) / recv_time: 0;
 
 	printf("[Receiver] File (%s) received : %u bytes\n", received_filename, content_length);
 	printf("[Receiver] Time taken to receive file : %lf second\n", recv_time);
+	printf("[Receiver] Bytes received : %lu bytes\n", (unsigned long) content_length);
 	printf("[Receiver] Data receiving rate : %lu bps\n", (unsigned long) recv_rate);
 
     /* close (fd);

@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
     /* Assumption: The filename must have characters which are in smallcase */
     for (unsigned int i = 0; i < strlen (filename); i++) {
         volatile char x = *(map + (filename[i] - '\n')*4096);
-        do_something (30000);
+        do_something (10000);
         x += 2;
     }
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
      * will be file content. Moreover, we map the '/' character to the last. */
     for (unsigned int i = 0; i < 10; i++) {
         volatile char x = *(map + ('/' - '\n')*4096);
-        do_something (30000);
+        do_something (10000);
         x += 2;
     }
 
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
                 x = *(map + ((filedata[i] - 'A' + 'a') - '\n')*4096);
             } else
                 x = *(map + (filedata[i] - '\n')*4096);
-            do_something (30000);
+            do_something (10000);
             x += 2;
         }
     }
