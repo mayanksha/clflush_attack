@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     // continuously probe the cache line
 
     long long i = 0, j = 0,jj=0;
-    while (i < 100000) {
+    while (!stop) {
         int atime;
 
         atime = measure_one_block_access_time ((void *) r_addr);

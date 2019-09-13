@@ -1,0 +1,35 @@
+<Go to the home directory of this project>
+
+------------------------------------------------------
+Task-1a
+------------------------------------------------------
+*To run the sender and reciever on different machines, run the following command from Task-1a folder
+
+$ gcc -g -O0 sender.c ../lib/util.c -o sender && taskset 0x1 ./sender ( from one terminal)
+$ gcc -g -O0 receiver.c ../lib/util.c -o receiver && taskset 0x4 ./receiver (from other terminal)
+
+To kill the receiver, you'll have to press Ctrl + C or give a SIGINT to the receiver process. The process will exit gracefully and will print whatever it has received via the cover channel. This has primarily been done so as to automate the data collection process for various values of loop_param.
+
+------------------------------------------------------
+Task-1b
+------------------------------------------------------
+* Note: You need to have a received_files folder inside Task-1b folder. This is the folder where the received files will be created using the received filename. 
+
+Both the below commands must be run from Task-1b folder and in separate terminals
+
+$ rm -f received_* && gcc -g -O0  receiver.c ../lib/util.c -o receiver -lm && taskset 0x4 ./receiver && cat received_*
+$ gcc -g -O0  sender.c ../lib/util.c -o sender && taskset 0x1 ./sender && kill -s SIGINT `pgrep receiver`
+
+------------------------------------------------------
+Task-2a
+------------------------------------------------------
+(Run the following commands from Task-2a folder)
+
+*To see addess hits for S/M/R simply run count.sh : It iteratively runs a loop over loop-parmeter and for each loop, calculates the number of cache hits for S/M/R. We can see the hits for each loop parameter on stdout. Command:
+$ bash count.sh
+
+*To simply run the spy program for any fixed value of loop parameter, we can use the command (1000 loop parameter)
+$ ./spy 1000
+
+*spy.c program outputs hit data and miss data in two separate files over execution. To plot from these files, run the following command
+$ python plot2a.py
