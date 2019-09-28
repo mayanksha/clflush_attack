@@ -37,7 +37,8 @@ do
             kill -s SIGINT ${job}
             wait ${job}
         done
-        accu=$(cat './temp' | grep -o 'Bytes received : .*' | sed 's/Bytes received : //' | sed 's/ bytes//')
+        recv=$(cat './temp' | grep -o 'received_filename: .*' | sed 's/received_filename: //')
+        accu=$(python acc.py "../sample.txt" "./received_files/${recv}")
         bps=$(cat './temp' | grep -o 'Data receiving rate.*' | sed 's/Data receiving rate : //' | sed 's/bps//g')
         echo "${times},${accu},${bps}"
     done

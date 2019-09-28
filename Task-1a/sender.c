@@ -29,11 +29,11 @@ int main(int argc, char **argv) {
     }
 
     printf("Enter message to be send: \n");
-    /* memset (msg, '\0', BYTES_SENT);
-     * fgets (msg, BYTES_SENT, stdin);  */
-    for (int i = 0; i < BYTES_SENT; i++) {
-        msg[i] = 'A' + (i % NUM_CHARS);
-    }
+    memset (msg, '\0', BYTES_SENT);
+    fgets (msg, BYTES_SENT, stdin);  
+    /* for (int i = 0; i < BYTES_SENT; i++) {
+     *     msg[i] = 'A' + (i % NUM_CHARS);
+     * } */
     msg[BYTES_SENT - 1] = '\0';
 
     t_send = clock();

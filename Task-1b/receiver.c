@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
     printf ("[Receiver] Looping now...in hope for some data\n");
 
     int break_now = 0;
-    char special_chars[8] = {'/', ' ', '.', '_', '\n', '#', '$', '-'};
+    char special_chars[18] = {'/', ' ', '.', '_', '\n', '#', '$', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     while (!stop) {
         int atime;

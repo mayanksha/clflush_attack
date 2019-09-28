@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
     /* We send the '/' character 10 times, so as to make the receiver aware
      * that filename reading has to finished now and that subsequent data
      * will be file content. Moreover, we map the '/' character to the last. */
-    for (unsigned int i = 0; i < 10; i++) {
+    for (unsigned int i = 0; i < 30; i++) {
         volatile char x = *(map + ('/' - '\n')*4096);
         do_something (10000);
         x += 2;

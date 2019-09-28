@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
 
     long long i = 0, j = 0,jj=0;
     while (j<30000 && jj<300000 && stop!=1) {
+
         int atime;
 
         atime = measure_one_block_access_time ((void *) r_addr);
