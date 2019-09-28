@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 	map_handle_t *handle;     // declaring a handle for file mapping
     char *map;
 
-    map = (char *) map_file("/tmp/test.txt", &handle);
+    map = (char *) map_file("../share_mem.txt", &handle);
     if(map == NULL){
         return -1;
     }

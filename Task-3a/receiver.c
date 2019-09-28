@@ -1,6 +1,7 @@
 #include "../lib/util.h"
 #include <unistd.h>
 #include <time.h>
+#include<math.h>
 //#include<string.h>
 void do_something(int loop_param) {
     for(int i=0;i<loop_param;i++) {
@@ -8,6 +9,37 @@ void do_something(int loop_param) {
         j++;
     }
     return;
+}
+int compare(const void * a, const void * b)
+{
+    return ( *(int*)a - *(int*)b );
+}
+#define NUM_ACCESSES 10000
+static inline int get_clflush_threshold (void *flush_addr) {
+    long long access_times[NUM_ACCESSES];
+    long long first_half_mean = 0, second_half_mean = 0;
+    volatile void *y = (volatile void *)flush_addr;
+
+    for (int i = 0; i < NUM_ACCESSES; i++) {
+        if (i % 2 == 0){
+            clflush((void *)y);
+            //do_something();
+        }
+        else{
+            measure_one_block_access_time((void*)y);
+        }
+        access_times[i] = measure_one_block_access_time ((void *)y);
+    }
+
+    qsort (access_times, NUM_ACCESSES, sizeof (long long), compare);
+    for (int i = 0; i < NUM_ACCESSES; i++)
+        if (i < (NUM_ACCESSES / 2))
+            first_half_mean += access_times[i];
+        else
+            second_half_mean += access_times[i];
+    first_half_mean /= (NUM_ACCESSES / 2);
+    second_half_mean /= (NUM_ACCESSES / 2);
+    return floor (0.9 * first_half_mean + 0.1 * second_half_mean);
 }
 int main(int argc, char **argv) {
 
@@ -59,7 +91,7 @@ int main(int argc, char **argv) {
 	map_handle_t *handle;     // declaring a handle for file mapping
     char *map;
 
-    map = (char *) map_file("/tmp/test.txt", &handle);
+    map = (char *) map_file("../share_mem.txt", &handle);
     if(map==NULL){
         perror("File not found");
         return -1;
@@ -71,7 +103,7 @@ int main(int argc, char **argv) {
     struct timespec tend = {0,0};
 
     //int loop_param = 500;
-    int THRESHOLD = 100;
+    int THRESHOLD = get_clflush_threshold((void*)map);
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     //CYCLES a,b;
     int flag=0,prev=0;
