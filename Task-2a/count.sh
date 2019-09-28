@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ENCYPTED_FILE="/home/msharma/build/gnupg-1.4.13/testconf/testdir/hello.txt.gpg"
-GPG_BINARY="/home/msharma/build/gnupg-1.4.13/g10/gpg"
+ENCYPTED_FILE="/home/vinayakt/Desktop/7thSem/SecureMemorySystems/assgn1/Task-1a/hello.txt.gpg"
+GPG_BINARY="/home/vinayakt/Desktop/7thSem/SecureMemorySystems/assgn1/Task-1a/gnupg-1.4.13/g10/gpg"
 
 gcc -Wall -g -O0  ./spy.c ../lib/util.c -o spy -lm
 if [ $? -ne 0 ]

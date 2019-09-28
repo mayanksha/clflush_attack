@@ -67,11 +67,13 @@ int main(int argc, char **argv) {
     int times;
     void *s_addr, *m_addr, *r_addr;
     struct pair data[30000];
-     struct pair mdata[300000];
+    //struct pair mdata[300000];
+
+    struct pair* mdata = (struct pair*)malloc(300000*sizeof(struct pair));
 
     signal(SIGINT, int_handler);
     memset (data, '\0', sizeof (data));
-    memset (mdata, '\0', sizeof (mdata));
+    memset (mdata, '\0', 300000*sizeof(struct pair));
     map_handle_t *file_map;
 
     if (argc != 2)
@@ -94,7 +96,7 @@ int main(int argc, char **argv) {
     // continuously probe the cache line
 
     long long i = 0, j = 0,jj=0;
-    while (i < 100000) {
+    while (j<30000 && jj<300000 && stop!=1) {
         int atime;
 
         atime = measure_one_block_access_time ((void *) r_addr);
